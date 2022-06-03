@@ -65,7 +65,6 @@ def main(argv=None):
     # main loop: sleep(sleep_seconds)
     while True:
         print("**************************")
-        print('totle finded count:', totle_find_count)
         print('Do new process....')
 
         if ues_redis:
@@ -85,10 +84,12 @@ def main(argv=None):
             rds.set('latest_search', datetime.utcnow().timestamp())
         else:
             record_time = datetime.utcnow()
+        
         count = req.meta["result_count"]
         tweets = req.data
+        print("time:", datetime.now())
         print("find tweets in this process: " + str(count))
-
+        print('totle finded count:', totle_find_count)
         for i in range(0,count):
             print("------------------> ")
             # get user info
