@@ -87,7 +87,7 @@ def main(argv=None):
         
         count = req.meta["result_count"]
         tweets = req.data
-        print("time:", datetime.now())
+        print("time(UTC):", datetime.now())
         print("find tweets in this process: " + str(count))
         print('totle finded count:', totle_find_count)
         for i in range(0,count):
