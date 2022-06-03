@@ -3,6 +3,7 @@ import sys
 from time import sleep
 from configparser import ConfigParser
 import tweepy
+import redis
 
 #======================
 class TweetContext:
@@ -29,8 +30,21 @@ def main(argv=None):
     access_token = conf['auth']['access_token']
     access_sec = conf['auth']['access_sec']
 
-    sleep_seconds = conf.getint('item', 'sleep_seconds')
-    key_words = conf['item']['key_words']
+    sleep_seconds = conf.getint('service', 'sleep_seconds')
+    key_words = conf['service']['key_words']
+
+    conf.read('config.ini', encoding='utf-8')
+    chost = conf['redis']['host']
+    cport = conf.getint('redis', 'port')
+    cdb = conf.getint('redis', 'db')
+    ues_redis = conf.getboolean('redis', 'use_redis')
+
+    print('********** config **********')
+    print('key_words:', key_words)
+    print('ues_redis:', ues_redis)
+
+    # connetc redis
+    rds = redis.StrictRedis(host=chost, port=cport, db=cdb)
 
     # auth client
     client = tweepy.Client(
@@ -72,14 +86,18 @@ def main(argv=None):
 
             # filter key words: RT & like & tag......
             filter_pass = False
-            count = filter_keywords(key_words, tweet.text.lower())
-            print("key world count:", count)
-            if count > 2:
-                filter_pass = True
+            find_count = filter_keywords(key_words, tweet.text.lower())
+            print("key world count:", find_count)
+            if ues_redis: # deduplicate use redis
+                if find_count >= 3 and not rds.sismember('tweet_done',tweet.tweetid ) :
+                    filter_pass = True
+            else: # deduplicate use dict
+                if find_count >= 3 and not tweet.tweetid in done_dict:
+                    filter_pass = True
 
             # do RT & like
             # TODO: find RT user and follow
-            if filter_pass and not tweet.tweetid in done_dict:
+            if filter_pass:
                 print("### find tw:", tweet.tweetid)
                 client.like(tweet_id=tweet.tweetid)
                 client.retweet(tweet_id=tweet.tweetid)
@@ -88,6 +106,8 @@ def main(argv=None):
                                     user_auth=True)
                 client.follow_user(tweet.userid, user_auth=True)
                 done_dict[tweet.tweetid] = True
+                if ues_redis:
+                    rds.sadd('tweet_done', tweet.tweetid)
                 totle_find_count += 1
         
         sleep(sleep_seconds)
