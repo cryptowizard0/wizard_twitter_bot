@@ -8,8 +8,9 @@ conf.read('config.ini', encoding='utf-8')
 chost = conf['redis']['host']
 cport = conf.getint('redis', 'port')
 cdb = conf.getint('redis', 'db')
+cpwd = conf['redis']['passwd']
 
-r = redis.StrictRedis(host=chost, port=cport, db=cdb)
+r = redis.StrictRedis(host=chost, port=cport, db=cdb, password=cpwd)
 
 # done list
 r.sadd("tweet_done", '13131312', '123123123123')

@@ -38,6 +38,7 @@ def main(argv=None):
     chost = conf['redis']['host']
     cport = conf.getint('redis', 'port')
     cdb = conf.getint('redis', 'db')
+    cpwd = conf['redis']['passwd']
     ues_redis = conf.getboolean('redis', 'use_redis')
 
     print('********** config **********')
@@ -45,7 +46,7 @@ def main(argv=None):
     print('ues_redis:', ues_redis)
 
     # connetc redis
-    rds = redis.StrictRedis(host=chost, port=cport, db=cdb)
+    rds = redis.StrictRedis(host=chost, port=cport, db=cdb, password=cpwd)
 
     # auth client
     client = tweepy.Client(
