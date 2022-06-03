@@ -4,7 +4,7 @@ from time import sleep
 from configparser import ConfigParser
 import tweepy
 import redis
-from datetime import datetime
+from datetime import datetime, timedelta
 
 #======================
 class TweetContext:
@@ -59,6 +59,7 @@ def main(argv=None):
     totle_find_count = 0
     # Deduplication.
     done_dict = {}
+    record_time = datetime.utcnow() - timedelta(days=1)
 
     # main loop: sleep(sleep_seconds)
     while True:
@@ -66,17 +67,23 @@ def main(argv=None):
         print('totle finded count:', totle_find_count)
         print('Do new process....')
 
-        b_last_time = rds.get('latest_search')
-        str_last_time = b_last_time.decode('utf-8')
-        f_last_time = float(str_last_time)
-        last_datetime = datetime.fromtimestamp(f_last_time)
+        if ues_redis:
+            b_last_time = rds.get('latest_search')
+            str_last_time = b_last_time.decode('utf-8')
+            f_last_time = float(str_last_time)
+            last_datetime = datetime.fromtimestamp(f_last_time)
+        else:
+            last_datetime = record_time
         req = client.get_home_timeline(max_results=20,
                                         tweet_fields= ['text', 'id', 'author_id'], 
                                         start_time = last_datetime
                                         #user_fields = "username",
                                         #expansions=['author_id', 'entities.mentions.username']
         )
-        rds.set('latest_search', datetime.utcnow().timestamp())
+        if ues_redis:
+            rds.set('latest_search', datetime.utcnow().timestamp())
+        else:
+            record_time = datetime.utcnow()
         count = req.meta["result_count"]
         tweets = req.data
         print("find tweets in this process: " + str(count))
