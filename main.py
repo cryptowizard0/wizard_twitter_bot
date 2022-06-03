@@ -4,6 +4,7 @@ from time import sleep
 from configparser import ConfigParser
 import tweepy
 import redis
+from datetime import datetime
 
 #======================
 class TweetContext:
@@ -54,8 +55,9 @@ def main(argv=None):
         access_token_secret=access_sec
     )
 
+
     totle_find_count = 0
-    # Deduplication. TODO: use redis
+    # Deduplication.
     done_dict = {}
 
     # main loop: sleep(sleep_seconds)
@@ -64,11 +66,17 @@ def main(argv=None):
         print('totle finded count:', totle_find_count)
         print('Do new process....')
 
-        req = client.get_home_timeline(max_results=10,
+        b_last_time = rds.get('latest_search')
+        str_last_time = b_last_time.decode('utf-8')
+        f_last_time = float(str_last_time)
+        last_datetime = datetime.fromtimestamp(f_last_time)
+        req = client.get_home_timeline(max_results=20,
                                         tweet_fields= ['text', 'id', 'author_id'], 
+                                        start_time = last_datetime
                                         #user_fields = "username",
                                         #expansions=['author_id', 'entities.mentions.username']
         )
+        rds.set('latest_search', datetime.utcnow().timestamp())
         count = req.meta["result_count"]
         tweets = req.data
         print("find tweets in this process: " + str(count))

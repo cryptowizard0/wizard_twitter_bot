@@ -6,5 +6,4 @@ For WL: Auto follow &amp; like &amp; RT
 - The Twitter developer auth configuration is in the config.ini 
 
 ## TODO
-- Get tweets by time 
 - Add daemon

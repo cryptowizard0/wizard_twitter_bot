@@ -1,5 +1,6 @@
 import redis
 from configparser import ConfigParser
+from datetime import datetime
 
  # read config 
 conf = ConfigParser()
@@ -10,13 +11,15 @@ cdb = conf.getint('redis', 'db')
 
 r = redis.StrictRedis(host=chost, port=cport, db=cdb)
 
-r.set('latest_search', 0)
-#r.persist('latest_search')
-
 # done list
 r.sadd("tweet_done", '13131312', '123123123123')
 r.persist('tweet_done')
 
+# time
+now = datetime.utcnow()
+r.set('latest_search', now.timestamp())
+r.persist('latest_search')
+print(now)
 
 # test
 print(r.ttl('tweet_done'))
