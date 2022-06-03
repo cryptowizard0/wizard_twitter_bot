@@ -24,15 +24,13 @@ def main(argv=None):
     conf = ConfigParser()
     conf.read('config.ini', encoding='utf-8')
 
-    auths = conf['auth']
-    api_key = auths['api_key']
-    api_sec = auths['api_sec']
-    access_token = auths['access_token']
-    access_sec = auths['access_sec']
+    api_key = conf['auth']['api_key']
+    api_sec = conf['auth']['api_sec']
+    access_token = conf['auth']['access_token']
+    access_sec = conf['auth']['access_sec']
 
-    items = conf['item']
     sleep_seconds = conf.getint('item', 'sleep_seconds')
-    key_words = items['key_words']
+    key_words = conf['item']['key_words']
 
     # auth client
     client = tweepy.Client(
@@ -52,24 +50,22 @@ def main(argv=None):
         print('totle finded count:', totle_find_count)
         print('Do new process....')
 
-        req = client.get_home_timeline(max_results=20,
+        req = client.get_home_timeline(max_results=10,
                                         tweet_fields= ['text', 'id', 'author_id'], 
                                         #user_fields = "username",
-                                        expansions=['author_id', 'entities.mentions.username'])
+                                        #expansions=['author_id', 'entities.mentions.username']
+        )
         count = req.meta["result_count"]
         tweets = req.data
-        users = req.includes['users']
         print("find tweets in this process: " + str(count))
 
         for i in range(0,count):
             print("------------------> ")
             # get user info
             user_info = client.get_user(id=tweets[i].author_id, user_auth=True)
-            # print("userinfo:", user_info)
 
             # twitter info
             # tw_info = client.get_tweet(tweets[i].id, user_auth=True)
-            # print("tw:", tw_info)
 
             tweet = TweetContext(tweets[i].id, tweets[i].text, user_info.data.id, user_info.data.name, user_info.data.username)
             print(str(tweet))

@@ -4,3 +4,8 @@ For WL: Auto follow &amp; like &amp; RT
 - Tweets that hit 3 or more keywords will be like + RT + follow
 - keyword list is configured in config.ini
 - The Twitter developer auth configuration is in the config.ini 
+
+## TODO
+- Use redis to deduplicate
+- Get tweets by time 
+- Add daemon
