@@ -45,6 +45,7 @@ def main(argv=None):
     print('********** config **********')
     print('key_words:', key_words)
     print('ues_redis:', ues_redis)
+    print('quote_context:', quote_context)
 
     # connetc redis
     rds = redis.StrictRedis(host=chost, port=cport, db=cdb, password=cpwd)
