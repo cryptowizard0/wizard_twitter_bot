@@ -33,6 +33,7 @@ def main(argv=None):
 
     sleep_seconds = conf.getint('service', 'sleep_seconds')
     key_words = conf['service']['key_words']
+    quote_context = conf['service']['quote_context']
 
     conf.read('config.ini', encoding='utf-8')
     chost = conf['redis']['host']
@@ -118,7 +119,7 @@ def main(argv=None):
                 print("### find tw:", tweet.tweetid)
                 client.like(tweet_id=tweet.tweetid)
                 client.retweet(tweet_id=tweet.tweetid)
-                client.create_tweet(text='Nice project! @webbergao1 @Deparetos @Mark_XZZ', 
+                client.create_tweet(text=quote_context, 
                                     quote_tweet_id=tweet.tweetid, 
                                     user_auth=True)
                 client.follow_user(tweet.userid, user_auth=True)
